@@ -1,0 +1,23 @@
+{
+  "name": "event-flagger",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "test": "vitest --silent=false"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.0",
+    "flat-cache": "^5.0.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "v4": "^0.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
