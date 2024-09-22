@@ -1,15 +1,15 @@
 import { sqlite } from "./sqlite.js";
 
 export const insert = async (namespace, record) => {
-  const rows = [];
+  const cols = [];
   const values = [];
 
   for (const key in record) {
-    rows.push(key);
+    cols.push(key);
     values.push(record[key]);
   }
 
-  const sql = `INSERT OR IGNORE INTO  ${namespace} (${rows.join(
+  const sql = `INSERT OR IGNORE INTO  ${namespace} (${cols.join(
     ","
   )}) VALUES (${Array(values.length).fill("?")})`;
 
@@ -25,6 +25,42 @@ export const insert = async (namespace, record) => {
   console.log(`RESULT: ${JSON.stringify(result)}`);
 };
 
-export const get = async (key) => {};
+export const find = async (namespace, query) => {
+  const params = [];
+
+  for (const key in query) {
+    params.push(`${key}="${query[key]}"`);
+  }
+  const predicate = params.join(" AND ");
+
+  // TODO: Parameterize for security
+  const sql = `SELECT * FROM ${namespace} WHERE ${predicate}`;
+  console.log(`SQL is: ${sql}`);
+
+  const db = await sqlite();
+
+  const result = await db.get(sql, (err) => {
+    if (err) {
+      console.log(`Database error: ${err}`);
+    }
+  });
+
+  return result;
+};
+
+export const all = async (namespace) => {
+  const sql = `SELECT * FROM ${namespace}`;
+  console.log(`sql: ${sql}`);
+
+  const db = await sqlite();
+
+  const result = await db.all(sql, (err) => {
+    if (err) {
+      console.log(`Database error: ${err}`);
+    }
+  });
+
+  return result;
+};
 
 export const remove = async (key) => {};
