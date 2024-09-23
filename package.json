@@ -11,8 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "flat-cache": "^5.0.0",
+    "ioredis": "^5.4.1",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
     "v4": "^0.0.1"
