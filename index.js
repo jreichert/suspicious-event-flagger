@@ -2,7 +2,6 @@ import express from "express";
 import { processEvents } from "./event_analyzer.js";
 import * as EventDAO from "./data/event.js";
 import * as CidrDAO from "./data/cidr.js";
-import * as EventAnalyzer from "./event_analyzer.js";
 
 export const app = express();
 
@@ -25,10 +24,10 @@ app.use(express.urlencoded({ extended: true }));
 app.put("/events", async (req, res) => {
   const events = req.body;
 
-  // This is intentionally left as async so the endpoint can be fire-and-forget
-  const result = processEvents(events);
+  // This is intentionally handled async so the endpoint can be fire-and-forget
+  await processEvents(events);
 
-  return res.status(200).json(result);
+  return res.status(200).json({ status: "success" });
 });
 
 // TODO: This would be implemented to mark an event as good when it had
@@ -38,21 +37,26 @@ app.delete("/event", async (_req, _res) => {});
 /**
  * Retrieve all events that have been marked as bad.
  * Note that in a prod environment we would provide capabilities
- * for filtering, summarization, and/or pagination.
+ * for filtering, summarization, and/or pagination (or possibly
+ * use a job-based approach where the output was an async downloadable
+ * file containing all entries requested).
  */
 app.get("/events", async (_req, res) => {
-    EventDAO.
+  // TODO: add filtering by date
+  const results = await EventDAO.getAll();
+
+  return res.status(200).json(results);
 });
 
 app.put("/cidr", async (req, res) => {
-  const cidr = req.body;
-  await CidrDAO.store(cidr);
+  const json = req.body;
+  await CidrDAO.store(json.cidr);
 
   return res.status(200).json({ status: "success" });
 });
 
 app.get("/cidrs", async (req, res) => {
-  const result = await CidrDAO.all();
+  const result = await CidrDAO.getAll();
 
   return res.status(200).json(result);
 });
