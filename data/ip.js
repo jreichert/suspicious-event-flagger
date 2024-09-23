@@ -3,10 +3,10 @@ import * as DB from "./db_client.js";
 const NAMESPACE = "ips";
 
 export const store = async (ip) => {
-  await DB.insert(NAMESPACE, ip);
+  await DB.addToSet(NAMESPACE, ip);
 };
 
-export const find = async (query) => {
-  const result = await DB.find(NAMESPACE, query);
-  return result;
+export const contains = async (ip) => {
+  const found = await DB.isInSet(NAMESPACE, ip);
+  return found;
 };

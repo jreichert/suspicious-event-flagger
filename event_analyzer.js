@@ -9,7 +9,7 @@ export const status = async (events) => {
   const badEvents = [];
 
   for (const event of events) {
-    // console.log(`NEXT: ${JSON.stringify(event)}`);
+    console.log(`NEXT: ${JSON.stringify(event)}`);
     const id = event.user_id;
     const badUser = await UserDAO.find({ id });
 

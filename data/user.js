@@ -2,11 +2,11 @@ import * as DB from "./db_client.js";
 
 const NAMESPACE = "users";
 
-export const store = async (user) => {
-  await DB.insert(NAMESPACE, user);
+export const store = async (username) => {
+  await DB.addToSet(NAMESPACE, username);
 };
 
-export const find = async (query) => {
-  const result = await DB.find(NAMESPACE, query);
-  return result;
+export const contains = async (username) => {
+  const found = await DB.isInSet(NAMESPACE, username);
+  return found;
 };

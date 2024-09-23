@@ -1,17 +1,40 @@
 import * as DB from "./db_client.js";
+import ip from "ip";
+import cidrMatcher from "cidr-matcher";
 
 const NAMESPACE = "cidrs";
 
+/**
+ * Add a cidr block to a Sorted Set in Redis.  This is an efficient storage
+ * mechanism for determining if an ip belongs to any of our known bad CIDR
+ * blocks because we only check the subnets that start before the target ip.
+ *
+ * @param {string} The cidr block in standard CIDR notation (x.x.x.x/y)
+ */
 export const store = async (cidr) => {
-  await DB.insert(NAMESPACE, cidr);
+  const cidrParts = cidr.split("/");
+  const sortKey = ip.toLong(cidrParts[0]);
+
+  await DB.addToSortedSet(NAMESPACE, sortKey, cidr);
 };
 
-export const all = async () => {
-  const result = await DB.all(NAMESPACE);
-  return result;
-};
+/**
+ * Determine if the bad CIDR list contains a given IP address.
+ *
+ * @param {string} ip The IP address to check
+ * @returns {string} The first matched CIDR block, or false if
+ *   no matches are found
+ */
+export const containsIp = async (ip) => {
+  const integerIp = ip.toLong(ip);
+  const candidates = await DB.getFromSortedSet(NAMESPACE, integerIp);
 
-export const find = async (query) => {
-  const result = await DB.find(NAMESPACE, query);
-  return result;
+  for (const candidate of candidates) {
+    const matcher = new cidrMatcher([candidate]);
+    if (matcher.contains(ip)) {
+      return candidate;
+    }
+  }
+
+  return null;
 };
