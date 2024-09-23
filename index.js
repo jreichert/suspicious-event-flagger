@@ -1,20 +1,32 @@
 import express from "express";
-import { status } from "./event_analyzer.js";
+import { processEvents } from "./event_analyzer.js";
 import * as EventDAO from "./data/event.js";
 import * as CidrDAO from "./data/cidr.js";
+import * as EventAnalyzer from "./event_analyzer.js";
 
 export const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Should take both an individual event, and a batch of events
+/**
+ * Send a list of system events to the application for analysis.
+ * "Bad" events will be stored for future analysis.  Events are considered bad
+ * for one of three reasons:
+ *
+ * * It is is a known bad CIDR block
+ * * It comes from a suspicious user
+ * * It comes from a suspicious IP (may or may not be in a bad CIDR block)
+ *
+ * To process an indivual event, simply send it as a one-item array.
+ * For scalability we only acknowledge receipt of the request; event processing
+ * is handled async.
+ */
 app.put("/events", async (req, res) => {
   const events = req.body;
-  const result = await status(events);
 
   // This is intentionally left as async so the endpoint can be fire-and-forget
-  // EventDAO.store(events);
+  const result = processEvents(events);
 
   return res.status(200).json(result);
 });
@@ -23,7 +35,14 @@ app.put("/events", async (req, res) => {
 // previouisly been marked as bad (i.e. our undo operation)
 app.delete("/event", async (_req, _res) => {});
 
-app.get("/events", async (_req, res) => {});
+/**
+ * Retrieve all events that have been marked as bad.
+ * Note that in a prod environment we would provide capabilities
+ * for filtering, summarization, and/or pagination.
+ */
+app.get("/events", async (_req, res) => {
+    EventDAO.
+});
 
 app.put("/cidr", async (req, res) => {
   const cidr = req.body;

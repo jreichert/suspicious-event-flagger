@@ -1,29 +1,37 @@
+import * as EventDAO from "./data/event.js";
 import * as UserDAO from "./data/user.js";
 import * as IpDAO from "./data/ip.js";
-import * as EventDAO from "./data/event.js";
+import * as CidrDAO from "./data/cidr.js";
+
+export const processEvents = async (events) => {
+  const badEvents = await badEvents(events);
+  await EventDAO.store(badEvents);
+};
 
 // For a prod implementation, each event would be processed in its own async process
 // rather than serially
-
-export const status = async (events) => {
+const badEvents = async (events) => {
   const badEvents = [];
 
   for (const event of events) {
     console.log(`NEXT: ${JSON.stringify(event)}`);
-    const id = event.user_id;
-    const badUser = await UserDAO.find({ id });
+    const userId = event.user_id;
+    const ipv4 = event.ipv4;
 
-    if (badUser) {
+    // TODO: if we are storing any info about the reason it was flagged,
+    // keep these 3 checks separate.  If if not, combine into 1 stmt
+    if (await UserDAO.contains(userId)) {
       badEvents.push(event);
     }
 
-    const ipv4 = event.ipv4;
-    const badIP = await IpDAO.find({ ipv4 });
+    if (IpDAO.contains(ipv4)) {
+      badEvents.push(event);
+    }
 
-    if (badIP) {
+    if (CidrDAO.containsIp(ipv4)) {
       badEvents.push(event);
     }
   }
 
-  return results;
+  return badEvents;
 };

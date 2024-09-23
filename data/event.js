@@ -1,5 +1,7 @@
 import * as DB from "./db_client.js";
+import { v4 as uuidv4 } from "uuid";
 
+const NAMESPACE = "events";
 /**
  * DAO for managing events.  Event objects have the following structure:
  * {
@@ -25,19 +27,16 @@ import * as DB from "./db_client.js";
  * @returns The number of events actually inserted
  */
 export const store = async (events) => {
-  const count = 0;
+  // We are adding these to the sorted set by timestamp
+  // since that is the most likely filter we would
+  // add first.  To add multiple items to a ZSET in one shot,
+  // args need to be sequenced as [score1, value1, score2,
+  // value2,...]
+  const scores = events.map((x) => x.timestamp);
+  const args = scores.map((item, index) => [item, events[index]]);
+  console.log(`ARGS: ${args}`);
 
-  for (const event in events) {
-    const err = await DB.insert(event);
-
-    if (err) {
-      console.log(`Error inserting event: ${err}`);
-    } else {
-      count += 1;
-    }
-  }
-
-  return count;
+  await DB.addToSortedSet(NAMESPACE, ...args);
 };
 
 /**
@@ -52,4 +51,7 @@ export const store = async (events) => {
  *
  *   @param {json} filter A filter object containing the criteria to use in filtering
  */
-export const get = async (_filter) => {};
+export const get = async (start = 0, end = Number.MAX_VALUE) => {
+  const found = await DB.getFromSortedSet(NAMESPACE, start, end);
+  return found;
+};

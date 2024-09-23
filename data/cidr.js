@@ -27,7 +27,7 @@ export const store = async (cidr) => {
  */
 export const containsIp = async (ip) => {
   const integerIp = ip.toLong(ip);
-  const candidates = await DB.getFromSortedSet(NAMESPACE, integerIp);
+  const candidates = await DB.getFromSortedSet(NAMESPACE, 0, integerIp);
 
   for (const candidate of candidates) {
     const matcher = new cidrMatcher([candidate]);
