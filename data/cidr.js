@@ -44,6 +44,6 @@ export const containsIp = async (ipv4) => {
 };
 
 export const getAll = async () => {
-  const all = await DB.getFromSortedSet(NAMESPACE, 0, Number.MAX_VALUE);
+  const all = await DB.getFromSortedSet(NAMESPACE);
   return all;
 };

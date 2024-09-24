@@ -3,13 +3,16 @@ import { v4 as uuidv4 } from "uuid";
 
 const NAMESPACE = "events";
 /**
- * DAO for managing events.  Event objects have the following structure:
+ * DAO for managing events.  Event objects have the following structure
+ * (currently only the first 4 fields are used):
  * {
  *   id: "some-uuid",
- *   user_id: "13445",
- *   ipv4: "192.244.137.0",
- *   type: "auth_failed",
+ *   username: "13445",
+ *   source_ip: "192.244.137.0",
  *   timestamp: 11241481358358
+ *   event_type: "auth_failed",
+ *   file_size_mb: 43,
+ *   application: "email"
  * }
 
 /**
@@ -39,7 +42,7 @@ export const store = async (events) => {
   // add first.  To add multiple items to a ZSET in one shot,
   // args need to be sequenced as [score1, value1, score2,
   // value2,...]
-  const scores = events.map((x) => x.timestamp);
+  const scores = events.map((x) => Date.parse(x.timestamp));
   const argsArray = scores.map((item, index) => [
     item,
     JSON.stringify(events[index]),
@@ -64,6 +67,6 @@ export const store = async (events) => {
  * @returns {Array<Event>} All events that were found
  */
 export const getAll = async (start = 0, end = Number.MAX_VALUE) => {
-  const found = await DB.getFromSortedSet(NAMESPACE, start, end);
+  const found = await DB.getJSONFromSortedSet(NAMESPACE, start, end);
   return found;
 };

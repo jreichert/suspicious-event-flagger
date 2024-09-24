@@ -21,17 +21,17 @@ app.use(express.urlencoded({ extended: true }));
  * For scalability we only acknowledge receipt of the request; event processing
  * is handled async.
  */
-app.put("/events", async (req, res) => {
+app.put("/events", (req, res) => {
   const events = req.body;
 
   // This is intentionally handled async so the endpoint can be fire-and-forget
-  await processEvents(events);
+  processEvents(events);
 
   return res.status(200).json({ status: "success" });
 });
 
 // TODO: This would be implemented to mark an event as good when it had
-// previouisly been marked as bad (i.e. our undo operation)
+// previously been marked as bad (i.e. our undo operation)
 app.delete("/event", async (_req, _res) => {});
 
 /**
@@ -41,9 +41,11 @@ app.delete("/event", async (_req, _res) => {});
  * use a job-based approach where the output was an async downloadable
  * file containing all entries requested).
  */
-app.get("/events", async (_req, res) => {
-  // TODO: add filtering by date
-  const results = await EventDAO.getAll();
+app.get("/events", async (req, res) => {
+  const start = req.query.start;
+  console.log(`start is ${start}`);
+  const end = req.query.end;
+  const results = await EventDAO.getAll(start, end);
 
   return res.status(200).json(results);
 });

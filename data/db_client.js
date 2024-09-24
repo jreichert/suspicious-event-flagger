@@ -59,7 +59,26 @@ export const getFromSortedSet = async (
   maxScore = Number.MAX_VALUE
 ) => {
   //version used just by cidr storage
+  return await redis.zrangebyscore(namespace, minScore, maxScore);
+};
+
+/**
+ * Return all entries from a Sorted Set in the given range.
+ *
+ * @param {string} namespace The name of the set
+ * @param {integer} minScore The lowest score to retrieve
+ * @param {integer} maxScore The highest score to retrieve
+ * @returns {Array<Object>} The objects retrieved
+ */
+export const getJSONFromSortedSet = async (
+  namespace,
+  minScore = 0,
+  maxScore = Number.MAX_VALUE
+) => {
+  //version used just by cidr storage
   const found = await redis.zrangebyscore(namespace, minScore, maxScore);
+  console.log("FOUND");
+  console.dir(found);
   const decoded = found.map(JSON.parse);
   return decoded;
 };

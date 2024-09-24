@@ -4,11 +4,22 @@ import * as IpDAO from "./data/ip.js";
 import * as CidrDAO from "./data/cidr.js";
 
 export const processEvents = async (events) => {
+  // A design decision that was made here was to determine if any events
+  // in a batch are bad at the start of the method, and we only persist
+  // the associated users & ips with those events *after* we make that
+  // determination.  While this speeds up processing time, it also has the effect
+  // that if any of the events in a given batch are only bad because
+  // previous events *in that same batch* were bad, they may get overlooked.
+  //
+  // Ideally the write API would be fronted by a message queue that could
+  // submit events more or less one at a time across multiple app servers.
+  // This could still result in out of order events, but far fewer of them.
   const badEvents = await filterEvents(events);
+  console.dir(badEvents);
 
   // Get all unique users & ips in this set of events
-  const badUsers = [...new Set(badEvents.map((x) => x.user_id))];
-  const badIPs = [...new Set(badEvents.map((x) => x.ipv4))];
+  const badUsers = [...new Set(badEvents.map((x) => x.username))];
+  const badIPs = [...new Set(badEvents.map((x) => x.source_ip))];
 
   // Add them to the respective sets
   await UserDAO.store(badUsers);
@@ -16,14 +27,12 @@ export const processEvents = async (events) => {
   await EventDAO.store(badEvents);
 };
 
-// For a prod implementation, each event would be processed in its own async process
-// rather than serially
 const filterEvents = async (events) => {
   // List of events may be large so process each in its own thread
   const badEvents = await Promise.all(
     events.map(async (event) => {
-      const userId = event.user_id;
-      const ipv4 = event.ipv4;
+      const userId = event.username;
+      const ipv4 = event.source_ip;
 
       if (await UserDAO.contains(userId)) {
         return event;
@@ -39,7 +48,7 @@ const filterEvents = async (events) => {
         return event;
       }
     })
-  );
+  ).then((values) => values.filter((v) => v));
 
   return badEvents;
 };
