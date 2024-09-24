@@ -17,14 +17,20 @@ export const processEvents = async (events) => {
   const badEvents = await filterEvents(events);
   console.dir(badEvents);
 
-  // Get all unique users & ips in this set of events
-  const badUsers = [...new Set(badEvents.map((x) => x.username))];
-  const badIPs = [...new Set(badEvents.map((x) => x.source_ip))];
+  if (badEvents.length > 0) {
+    // Get all unique users & ips in this set of events
+    const badUsers = [...new Set(badEvents.map((x) => x.username))];
+    const badIPs = [...new Set(badEvents.map((x) => x.source_ip))];
+    console.log("Bad Users:");
+    console.dir(badUsers);
+    console.log("Bad IPs");
+    console.dir(badIPs);
 
-  // Add them to the respective sets
-  await UserDAO.store(badUsers);
-  await IpDAO.store(badIPs);
-  await EventDAO.store(badEvents);
+    // Add them to the respective sets
+    await UserDAO.store(badUsers);
+    await IpDAO.store(badIPs);
+    await EventDAO.store(badEvents);
+  }
 };
 
 const filterEvents = async (events) => {
@@ -35,16 +41,24 @@ const filterEvents = async (events) => {
       const ipv4 = event.source_ip;
 
       if (await UserDAO.contains(userId)) {
+        console.log(`Matched on user ${userId}`);
+        event.root_cause = `user ${userId}`;
+        // console.dir(event);
         return event;
       }
 
       if (await IpDAO.contains(ipv4)) {
+        console.log(`Matched on ipv4 ${ipv4}`);
+        event.root_cause = `Matched on ipv4 ${ipv4}`;
+        // console.dir(event);
         return event;
       }
 
       const match = await CidrDAO.containsIp(ipv4);
       if (match) {
-        console.log(`Match found for ip ${ipv4}: ${match}`);
+        console.log(`Matched on CIDR with ip ${ipv4}`);
+        event.root_cause = `Matched on CIDR ${match}`;
+        // console.dir(event);
         return event;
       }
     })

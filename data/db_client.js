@@ -9,8 +9,15 @@ import { redis } from "./redis.js";
  * @returns {int} the number of values added to the set
  */
 export const addToSet = async (namespace, data) => {
-  const result = await redis.sadd(namespace, data);
-  return result;
+  console.log(`Adding to set ${namespace}`);
+  console.dir({ msg: `Adding to set ${namespace}`, data });
+  try {
+    const result = await redis.sadd(namespace, data);
+    return result;
+  } catch (err) {
+    console.log("Data error:");
+    console.dir(err.stack);
+  }
 };
 
 /**
@@ -75,10 +82,28 @@ export const getJSONFromSortedSet = async (
   minScore = 0,
   maxScore = Number.MAX_VALUE
 ) => {
-  //version used just by cidr storage
-  const found = await redis.zrangebyscore(namespace, minScore, maxScore);
-  console.log("FOUND");
-  console.dir(found);
-  const decoded = found.map(JSON.parse);
-  return decoded;
+  try {
+    const found = await redis.zrangebyscore(namespace, minScore, maxScore);
+    const decoded = found.map(JSON.parse);
+    return decoded;
+  } catch (err) {
+    console.log(`Error retrieving JSON from set ${namespace}`);
+    console.dir(err.stack);
+    return null;
+  }
+};
+
+/**
+ * Remove one or more values from a Set.
+ *
+ * @param namespace The name of the Set
+ * @param values A single value or an array of values
+ */
+export const removeFromSet = async (namespace, values) => {
+  try {
+    await redis.zrem(namespace, values);
+  } catch (err) {
+    console.log(`Error removing values from set ${namespace}`);
+    console.dir(err.stack);
+  }
 };

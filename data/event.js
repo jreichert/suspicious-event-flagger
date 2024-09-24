@@ -67,6 +67,7 @@ export const store = async (events) => {
  * @returns {Array<Event>} All events that were found
  */
 export const getAll = async (start = 0, end = Number.MAX_VALUE) => {
+  console.log(`Retrieving all events in date range ${start}-${end}`);
   const found = await DB.getJSONFromSortedSet(NAMESPACE, start, end);
   return found;
 };

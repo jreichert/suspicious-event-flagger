@@ -2,6 +2,7 @@ import express from "express";
 import { processEvents } from "./event_analyzer.js";
 import * as EventDAO from "./data/event.js";
 import * as CidrDAO from "./data/cidr.js";
+import { processJSONL } from "./util/processJSONL.js";
 
 export const app = express();
 
@@ -43,11 +44,32 @@ app.delete("/event", async (_req, _res) => {});
  */
 app.get("/events", async (req, res) => {
   const start = req.query.start;
-  console.log(`start is ${start}`);
   const end = req.query.end;
   const results = await EventDAO.getAll(start, end);
 
   return res.status(200).json(results);
+});
+
+/**
+ * For testing only.  Loads events from the test file.
+ * In real life this would *not* be a public method.  We
+ * would instead have a proper test framework that would read from
+ * the file instead.
+ */
+app.post("/ingest_events", (_req, res) => {
+  processJSONL(
+    "./misc/events.jsonl",
+    40000,
+    () => {},
+    (bufferArray) => {
+      processEvents(bufferArray);
+      // console.log("---------");
+      // console.log(`Processing buffer of ${bufferArray.length} items`);
+      // console.dir(bufferArray);
+    }
+  );
+
+  return res.status(200).json({ status: "success" });
 });
 
 app.put("/cidr", async (req, res) => {
@@ -57,10 +79,21 @@ app.put("/cidr", async (req, res) => {
   return res.status(200).json({ status: "success" });
 });
 
-app.get("/cidrs", async (req, res) => {
+app.get("/cidrs", async (_req, res) => {
   const result = await CidrDAO.getAll();
 
   return res.status(200).json(result);
+});
+
+/**
+ * Remove a CIDR block that has been marked bad.
+ * If the CIDR block isn't in the set, this is a noop.
+ */
+app.delete("/cidr", async (req, res) => {
+  const json = req.body;
+  await CidrDAO.del(json.cidr);
+
+  return res.status(200).json({ status: "success" });
 });
 
 // TODO: this would be implemented to mark a CIDR block as good, with the following:

@@ -12,11 +12,20 @@ const NAMESPACE = "cidrs";
  * @param {string} The cidr block in standard CIDR notation (x.x.x.x/y)
  */
 export const store = async (cidr) => {
-  console.log(`cidr val: ${cidr}, type: ${typeof cidr}`);
+  console.log(`cidr/store: ${cidr}`);
   const cidrParts = cidr.split("/");
   const sortKey = ip.toLong(cidrParts[0]);
 
   await DB.addToSortedSet(NAMESPACE, sortKey, cidr);
+};
+
+export const getAll = async () => {
+  const all = await DB.getFromSortedSet(NAMESPACE);
+  return all;
+};
+
+export const del = async (cidr) => {
+  await DB.removeFromSet(NAMESPACE, cidr);
 };
 
 /**
@@ -29,8 +38,10 @@ export const store = async (cidr) => {
 export const containsIp = async (ipv4) => {
   const integerIp = ip.toLong(ipv4);
   const candidates = await DB.getFromSortedSet(NAMESPACE, 0, integerIp);
-  console.log("candidates:");
-  console.dir(candidates);
+  if (ipv4 == "171.79.178.249") {
+    console.log(`candidates for ${ipv4} (${integerIp}):`);
+    console.dir(candidates);
+  }
 
   for (const candidate of candidates) {
     const matcher = new cidrMatcher([candidate]);
@@ -41,9 +52,4 @@ export const containsIp = async (ipv4) => {
   }
 
   return null;
-};
-
-export const getAll = async () => {
-  const all = await DB.getFromSortedSet(NAMESPACE);
-  return all;
 };
