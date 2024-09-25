@@ -40,11 +40,11 @@ describe("db_client/isInSet", () => {
 });
 
 describe("db_client/filterEntriesInSet", () => {
-  const bars = ["snickers", "mars", "three musketeers"];
-  const filteredBars = ["snickers", "three musketeers"];
-  redis.smismember.mockReturnValue(filteredBars);
-
   it("should return a filtered subset of an input set", async () => {
+    const bars = ["snickers", "mars", "three musketeers"];
+    const filteredBars = ["snickers", "three musketeers"];
+    redis.smismember.mockReturnValue(filteredBars);
+
     const result = await DB.filterEntriesInSet("candy", bars);
     expect(redis.smismember).toBeCalledWith("candy", bars);
     expect(result).toEqual(filteredBars);
