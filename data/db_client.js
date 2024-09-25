@@ -1,4 +1,5 @@
 import { redis } from "./redis.js";
+import * as CidrUtils from "../util/cidr_utils.js";
 
 /**
  * Add the given value or values to a Redis set.  The same method can be
@@ -48,6 +49,7 @@ export const isInSet = async (namespace, value) => {
  */
 export const filterEntriesInSet = async (namespace, values) => {
   const found = await redis.smismember(namespace, values);
+  console.log(`Filtered bars: ${found}`);
 
   return found;
 };

@@ -88,6 +88,12 @@ app.get("/cidrs", async (_req, res) => {
 /**
  * Remove a CIDR block that has been marked bad.
  * If the CIDR block isn't in the set, this is a noop.
+ *
+ * TODO: this would be implemented to mark a CIDR block as good, with the following:
+ * * if the CIDR block exists, delete it
+ * * if a subnet of the CIDR block exists, delete it if 'cascade' == true
+ * * if this CIDR block is part of a bigger network, split the portions around it
+ *   into multiple subnets
  */
 app.delete("/cidr", async (req, res) => {
   const json = req.body;
@@ -95,13 +101,6 @@ app.delete("/cidr", async (req, res) => {
 
   return res.status(200).json({ status: "success" });
 });
-
-// TODO: this would be implemented to mark a CIDR block as good, with the following:
-// * if the CIDR block exists, delete it
-// * if a subnet of the CIDR block exists, delete it if 'cascade' == true
-// * if this CIDR block is part of a bigger network, split the portions around it
-//   into multiple subnets
-app.delete("/cidr", async (_req, _res) => {});
 
 const server = app.listen(3000, () => {
   console.log(`API server listening on port 3000`);

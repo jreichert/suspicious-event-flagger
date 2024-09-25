@@ -3,19 +3,15 @@ import * as UserDAO from "./data/user.js";
 import * as IpDAO from "./data/ip.js";
 import * as CidrDAO from "./data/cidr.js";
 
+/*
+ * Examine a list of events and store suspicious ones for later analysis.
+ * If an event is suspicious then we add the root cause to the event, store it,
+ * and also store the event's user and ip in their respective suspicious lists.
+ *
+ * @param {Array} events The list of events to process
+ */
 export const processEvents = async (events) => {
-  // A design decision that was made here was to determine if any events
-  // in a batch are bad at the start of the method, and we only persist
-  // the associated users & ips with those events *after* we make that
-  // determination.  While this speeds up processing time, it also has the effect
-  // that if any of the events in a given batch are only bad because
-  // previous events *in that same batch* were bad, they may get overlooked.
-  //
-  // Ideally the write API would be fronted by a message queue that could
-  // submit events more or less one at a time across multiple app servers.
-  // This could still result in out of order events, but far fewer of them.
   const badEvents = await filterEvents(events);
-  console.dir(badEvents);
 
   if (badEvents.length > 0) {
     // Get all unique users & ips in this set of events
@@ -33,6 +29,18 @@ export const processEvents = async (events) => {
   }
 };
 
+/**
+ * Filter a list of events by determining which ones are suspicious.
+ *
+ * Events are considered suspicious for one of three reasons:
+ *
+ * * It is is a known suspicious CIDR block
+ * * It comes from a suspicious user
+ * * It comes from a suspicious IP (may or may not be in a suspicious CIDR block)
+ *
+ * @param {Array} events The list of events to process
+ *
+ */
 const filterEvents = async (events) => {
   // List of events may be large so process each in its own thread
   const badEvents = await Promise.all(

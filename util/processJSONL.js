@@ -1,6 +1,18 @@
 import fs from "fs";
 import readline from "readline";
 
+/**
+ * Buffer every line of a JSONL file and perform an operation on the buffers.
+ * For this project, this is used for reading lines of the sample data in chunks
+ * and then processing those chunks with event_analyzer.js.
+ *
+ * @param {String} filePath The path to the file to parse
+ * @param {int} bufferSize The number of lines to buffer before processing
+ * @param {String} lineProcessor A call back used to process a line before
+ *   adding it o the buffer (currently unused)
+ * @param {String} bufferCallback The function to send the buffer to after
+ *   it is full
+ */
 export const processJSONL = (
   filePath,
   bufferSize,
@@ -44,21 +56,3 @@ export const processJSONL = (
     console.log("Finished processing JSONL file");
   });
 };
-
-// Usage example
-// const processLine = async (jsonObject) => {
-//   console.log("Processing:", jsonObject);
-//   // Perform any per-line processing here if needed
-// };
-
-// const processBuffer = async (bufferArray) => {
-//   console.log(`Processing buffer of ${bufferArray.length} items`);
-//   // Process the buffer array here
-//   // For example:
-//   // await someAsyncOperation(bufferArray);
-// };
-
-// const filePath = "../misc/events.jsonl";
-// const bufferSize = 10; // Adjust this value as needed
-
-// processJSONL(filePath, bufferSize, processLine, processBuffer);
