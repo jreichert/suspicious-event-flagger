@@ -82,6 +82,13 @@ A heavyweight application framework like Spring Boot would not be a good choice.
 
 While not directly relevant on technical merits, an additional reason for choosing Node from a leadership perspective is that it is relatively easy and inexpensive to hire Node developers.  Additionally, setup and management of NginX/Node clusters at scale isn't particularly hard compared to other options.
 
+# Improvements
+Of course this is not a production-ready application.  These are a few areas that have been skipped due to time.
+
+* Proper error handling: A few error handling examples are present in the code but full error handling for every method would need to be added.
+* Logging: all logging currently is through console.log, and most log statements exist for debugging purposes.  A production application would intentionally write easily parseable log lines with semantic meaning.
+* Test Coverage: I have provided a number of tests using Vitest to show how I approach the creation of a unit test harness, but it is not fully fleshed out.  A production application would aim for 100% line coverage, as well as checking all possible outcomes from methods (e.g. in a method like `isItReal(thing)`, have tests for true, false, and throwing an Error where expected). Note that as a matter of practice I only test the public methods of any object; the expectation is that public methods should always "do the right thing", and non-public methods are allowed to be added, changed or removed at any time as long as that condition is satisfied. 
+
 # Application Scaling
 Of course this is not meant to be a production-ready application as-is.  This section outlines the broader system design tht could be used to productionalize the application.
 
