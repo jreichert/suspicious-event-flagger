@@ -1,5 +1,5 @@
 {
-  "name": "event-flagger",
+  "name": "suspicious-event-flagger",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",

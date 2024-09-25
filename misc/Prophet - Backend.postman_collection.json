@@ -7,34 +7,27 @@
 	},
 	"item": [
 		{
-			"name": "/cidr",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"cidr\": \"192.168.244.0/24\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+			"name": "For Testing",
+			"item": [
+				{
+					"name": "/ingest_events",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}:{{port}}/ingest_events",
+							"host": [
+								"{{url}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"ingest_events"
+							]
 						}
-					}
-				},
-				"url": {
-					"raw": "127.0.0.1:3000/cidr",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "3000",
-					"path": [
-						"cidr"
-					]
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
 			"name": "/cidrs",
@@ -58,13 +51,13 @@
 			"response": []
 		},
 		{
-			"name": "/events",
+			"name": "/cidr",
 			"request": {
 				"method": "PUT",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "[    \n    { \n        \"user_id\": \"jake\",\n        \"ipv4\": \"192.168.0.277\",\n        \"type\": \"auth_failed\"\n    }\n]",
+					"raw": "{\n    \"cidr\": \"{{cidr}}\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -72,16 +65,40 @@
 					}
 				},
 				"url": {
-					"raw": "127.0.0.1:3000/events",
+					"raw": "{{url}}:{{port}}/cidr",
 					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
+						"{{url}}"
 					],
-					"port": "3000",
+					"port": "{{port}}",
 					"path": [
-						"events"
+						"cidr"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/cidr",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"cidr\": \"{{cidr}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}:{{port}}/cidr",
+					"host": [
+						"{{url}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"cidr"
 					]
 				}
 			},
@@ -128,6 +145,33 @@
 							"key": "end",
 							"value": "{{eventEnd}}"
 						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/events",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[    \n    {\"timestamp\": \"2024-01-01T00:01:14Z\", \"username\": \"vevans\", \"source_ip\": \"177.205.53.245\", \"event_type\": \"file_download\", \"file_size_mb\": 34, \"application\": \"email\", \"success\": true},\n{\"timestamp\": \"2024-01-01T00:03:23Z\", \"username\": \"meyermelvin\", \"source_ip\": \"136.150.51.58\", \"event_type\": \"login\", \"application\": \"issue_management\", \"success\": true},\n{\"timestamp\": \"2024-01-01T00:09:56Z\", \"username\": \"dennis57\", \"source_ip\": \"56.168.117.77\", \"event_type\": \"file_upload\", \"file_size_mb\": 21, \"application\": \"calendar\", \"success\": true}\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}:{{port}}/events",
+					"host": [
+						"{{url}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"events"
 					]
 				}
 			},
